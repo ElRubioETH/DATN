@@ -8,24 +8,41 @@ public class TurretZoneTrigger : MonoBehaviour
 
     private TurretController turret;
     private Transform sitPosition;
-
     private Transform gunTransform;
+
+    private Camera playerCamera;
+    [SerializeField] private Camera turretCamera;
 
     void Start()
     {
-        turret = GetComponentInParent<TurretController>();
+        // Tìm turret qua tag (phải gắn tag "Turret" trong Inspector)
+        turret = GameObject.FindWithTag("Turret")?.GetComponent<TurretController>();
         if (turret == null)
-            Debug.LogError("Không tìm thấy TurretController trong parent!");
+        {
+            Debug.LogError("Không tìm thấy TurretController qua tag 'Turret'!");
+            return;
+        }
 
-        sitPosition = turret.transform.Find("SitPosition");
-        if (sitPosition == null)
-            Debug.LogError("Không tìm thấy SitPosition trong turret!");
+        // Tìm SitPosition trong scene (phải đặt tên đúng "SitPosition")
+        GameObject sitObj = GameObject.Find("SitPosition");
+        if (sitObj == null)
+        {
+            Debug.LogError("Không tìm thấy GameObject SitPosition trong scene!");
+            return;
+        }
+        sitPosition = sitObj.transform;
 
+        // Tìm Gun để gắn player vào
         gunTransform = turret.transform.Find("BasePivot/HeadPivot/Gun");
         if (gunTransform == null)
-            Debug.LogError("Không tìm thấy Gun trong turret!");
-    }
+        {
+            Debug.LogError("Không tìm thấy gunTransform trong Turret!");
+        }
 
+        // Đảm bảo TurretCamera đang tắt lúc đầu
+        if (turretCamera != null)
+            turretCamera.enabled = false;
+    }
 
     void OnTriggerEnter(Collider other)
     {
@@ -33,6 +50,8 @@ public class TurretZoneTrigger : MonoBehaviour
         {
             player = other.gameObject;
             playerInZone = true;
+
+            playerCamera = player.GetComponentInChildren<Camera>();
         }
     }
 
@@ -60,6 +79,8 @@ public class TurretZoneTrigger : MonoBehaviour
 
     void EnterTurret()
     {
+        if (player == null || sitPosition == null) return;
+
         CharacterController cc = player.GetComponent<CharacterController>();
         if (cc != null)
         {
@@ -68,11 +89,17 @@ public class TurretZoneTrigger : MonoBehaviour
             cc.enabled = true;
         }
 
-        player.transform.SetParent(gunTransform); // gắn vào gun thay vì turret
+        // Gắn player vào gun để nó quay theo turret
+        player.transform.SetParent(sitPosition);
 
+        // Disable movement
         var fpc = player.GetComponent<FirstPersonController>();
         if (fpc != null)
             fpc.enabled = false;
+
+        // Chuyển camera
+        if (playerCamera != null) playerCamera.enabled = false;
+        if (turretCamera != null) turretCamera.enabled = true;
 
         turret.EnableControl();
         isControlling = true;
@@ -80,13 +107,19 @@ public class TurretZoneTrigger : MonoBehaviour
 
     void ExitTurret()
     {
-        if (player == null || turret == null) return;
+        if (player == null) return;
 
-        player.transform.SetParent(null); // Gỡ khỏi turret
+        // Gỡ khỏi turret
+        player.transform.SetParent(null);
 
-        FirstPersonController fpc = player.GetComponent<FirstPersonController>();
+        // Bật lại điều khiển
+        var fpc = player.GetComponent<FirstPersonController>();
         if (fpc != null)
             fpc.enabled = true;
+
+        // Camera ngược lại
+        if (playerCamera != null) playerCamera.enabled = true;
+        if (turretCamera != null) turretCamera.enabled = false;
 
         turret.DisableControl();
         isControlling = false;
