@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Train
   - Turret
+  - Enemy
   layers:
   - Default
   - TransparentFX

@@ -13,6 +13,8 @@ public class TurretZoneTrigger : MonoBehaviour
     private Camera playerCamera;
     [SerializeField] private Camera turretCamera;
 
+    [SerializeField] private UICameraSwitcher uiCameraSwitcher; // THÊM BIẾN NÀY
+
     void Start()
     {
         // Tìm turret qua tag (phải gắn tag "Turret" trong Inspector)
@@ -89,17 +91,18 @@ public class TurretZoneTrigger : MonoBehaviour
             cc.enabled = true;
         }
 
-        // Gắn player vào gun để nó quay theo turret
         player.transform.SetParent(sitPosition);
 
-        // Disable movement
         var fpc = player.GetComponent<FirstPersonController>();
         if (fpc != null)
             fpc.enabled = false;
 
-        // Chuyển camera
         if (playerCamera != null) playerCamera.enabled = false;
         if (turretCamera != null) turretCamera.enabled = true;
+
+        // Gán camera UI cho turret
+        if (uiCameraSwitcher != null)
+            uiCameraSwitcher.SetCanvasCamera(turretCamera);
 
         turret.EnableControl();
         isControlling = true;
@@ -109,17 +112,18 @@ public class TurretZoneTrigger : MonoBehaviour
     {
         if (player == null) return;
 
-        // Gỡ khỏi turret
         player.transform.SetParent(null);
 
-        // Bật lại điều khiển
         var fpc = player.GetComponent<FirstPersonController>();
         if (fpc != null)
             fpc.enabled = true;
 
-        // Camera ngược lại
         if (playerCamera != null) playerCamera.enabled = true;
         if (turretCamera != null) turretCamera.enabled = false;
+
+        // Gán lại camera UI về player
+        if (uiCameraSwitcher != null)
+            uiCameraSwitcher.SetCanvasCamera(playerCamera);
 
         turret.DisableControl();
         isControlling = false;

@@ -7,7 +7,7 @@ public class TurretShooting : MonoBehaviour
     public GameObject bulletPrefab;
     public float fireForce = 500f;
     public float fireRate = 0.2f;
-
+    public TurretController controller;
     public GameObject muzzleEffectPrefab;
     public Transform effectPoint1;
     public Transform effectPoint2;
@@ -20,6 +20,8 @@ public class TurretShooting : MonoBehaviour
 
     void Start()
     {
+        controller = GetComponent<TurretController>();
+
         // Tự động thêm AudioSource nếu chưa có
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
@@ -30,6 +32,8 @@ public class TurretShooting : MonoBehaviour
 
     void Update()
     {
+        if (controller == null || !controller.enabled || !controller.IsControlled()) return;
+
         fireCooldown -= Time.deltaTime;
 
         if (Input.GetMouseButton(0) && fireCooldown <= 0f)

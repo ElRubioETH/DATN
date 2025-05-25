@@ -19,6 +19,10 @@ public class TurretController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked; // Khóa chuột vào giữa màn hình
         Cursor.visible = false;                       // Giữ chuột hiển thị
     }
+    public bool IsControlled()
+    {
+        return isControlled;
+    }
 
     public void DisableControl()
     {
