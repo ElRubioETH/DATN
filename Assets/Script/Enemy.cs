@@ -20,13 +20,18 @@ public class Enemy : MonoBehaviour
 
     private NavMeshAgent agent;
     private Vector3 initialPosition;
+    private Animator anim;
 
     private enum State { Idle, Chasing, Returning }
     private State currentState = State.Idle;
 
+    private bool isDead = false;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        anim = GetComponentInChildren<Animator>(); // get that spicy Animator
+
         currentHealth = maxHealth;
         UpdateHealthUI();
 
@@ -38,7 +43,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
+        if (isDead || player == null) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -47,12 +52,13 @@ public class Enemy : MonoBehaviour
             case State.Idle:
                 if (distanceToPlayer <= chaseDistance)
                     currentState = State.Chasing;
+                agent.SetDestination(transform.position); // stay idle
                 break;
 
             case State.Chasing:
                 if (distanceToPlayer <= stopDistance)
                 {
-                    agent.SetDestination(transform.position); // Đứng yên
+                    agent.SetDestination(transform.position); // Stand still
                 }
                 else if (distanceToPlayer >= returnDistance)
                 {
@@ -77,7 +83,14 @@ public class Enemy : MonoBehaviour
                 break;
         }
 
-        // Luôn xoay health bar nhìn camera
+        // Animator Speed param
+        if (anim != null)
+        {
+            float movementSpeed = agent.velocity.magnitude;
+            anim.SetFloat("Speed", movementSpeed);
+        }
+
+        // Face camera
         if (healthBarCanvas != null && Camera.main != null)
         {
             healthBarCanvas.rotation = Quaternion.LookRotation(healthBarCanvas.position - Camera.main.transform.position);
@@ -86,12 +99,15 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+        if (isDead) return;
+
         currentHealth -= amount;
+        UpdateHealthUI();
+
         if (currentHealth <= 0f)
         {
             Die();
         }
-        UpdateHealthUI();
     }
 
     void UpdateHealthUI()
@@ -104,6 +120,15 @@ public class Enemy : MonoBehaviour
 
     void Die()
     {
-        Destroy(gameObject); // Hoặc làm animation, disable...
+        isDead = true;
+        agent.isStopped = true;
+
+        if (anim != null)
+        {
+            anim.SetBool("isDead", true);
+        }
+
+        // Destroy after animation plays
+        Destroy(gameObject, 3f); // or use event callback from animation
     }
 }
