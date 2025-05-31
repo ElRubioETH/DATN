@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 16730c20f209b5b4aa25c51cbf11bd8d
+timeCreated: 1427408839
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33428
+  packageName: Automapping Enviroment Shader
+  packageVersion: 1.0
+  assetPath: Assets/Almgp_automapping_shader/prefabs/rock_sea.prefab
+  uploadId: 56840
