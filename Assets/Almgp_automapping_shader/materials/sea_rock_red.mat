@@ -235,8 +235,8 @@ Material:
     - _specularpower: 0
     - _tiling: 0.86
     m_Colors:
-    - _BaseColor: {r: 0.899371, g: 0.6191591, b: 0.44402903, a: 1}
-    - _Color: {r: 0.899371, g: 0.6191591, b: 0.444029, a: 1}
+    - _BaseColor: {r: 0.92941177, g: 0.7882353, b: 0.42352942, a: 1}
+    - _Color: {r: 0.92941177, g: 0.7882353, b: 0.4235294, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
