@@ -14,6 +14,11 @@ public class TrainController : MonoBehaviour
     public float deceleration = 0.05f;
     public float rearCarDistance = 2f; // khoảng cách lùi sau (tính bằng spline %)
 
+    [Header("Audio")]
+    public AudioSource startOrReverseSource; // loop sound with increasing pitch
+    public AudioSource brakeSource;          // loop sound
+    public AudioSource runningSource;        // loop background sound
+
     private float currentSpeed = 0f;
     private float t = 0f;
     private int direction = 1;
@@ -22,11 +27,12 @@ public class TrainController : MonoBehaviour
 
     void Start()
     {
-        // Gắn vị trí đầu tiên
+        // Đảm bảo brakeSource được loop
+        brakeSource.loop = true;
+
         MoveTrain(train, t);
 
-        // Tính và gắn vị trí cho toa sau (offset ngay từ đầu)
-        float rearT = Mathf.Repeat(t - (rearCarDistance * direction / splineContainer.CalculateLength()), 1f);
+        float rearT = Mathf.Repeat(t - (rearCarDistance / splineContainer.CalculateLength()), 1f);
         MoveTrain(rearCar, rearT);
     }
 
@@ -44,7 +50,13 @@ public class TrainController : MonoBehaviour
         {
             currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
             if (Mathf.Approximately(currentSpeed, 0f))
+            {
                 isMoving = false;
+
+                startOrReverseSource.Stop();
+                runningSource.Stop();
+                brakeSource.Stop(); // Dừng âm thanh phanh khi tàu dừng
+            }
         }
 
         // Di chuyển dọc theo spline
@@ -53,9 +65,15 @@ public class TrainController : MonoBehaviour
 
         MoveTrain(train, t);
 
-        // Toa phía sau chạy theo khoảng cách offset
-        float rearT = Mathf.Repeat(t - (rearCarDistance * direction / splineContainer.CalculateLength()), 1f);
+        float rearT = Mathf.Repeat(t - (rearCarDistance / splineContainer.CalculateLength()), 1f);
         MoveTrain(rearCar, rearT);
+
+        // Tăng dần pitch âm start theo tốc độ
+        if (startOrReverseSource.isPlaying)
+        {
+            float speedRatio = Mathf.Abs(currentSpeed / maxSpeed);
+            startOrReverseSource.pitch = Mathf.Lerp(0.3f, 1f, speedRatio);
+        }
     }
 
     private void MoveTrain(Transform target, float tValue)
@@ -76,11 +94,36 @@ public class TrainController : MonoBehaviour
         isMoving = true;
         isBraking = false;
         direction = 1;
+
+        // Tắt brake sound nếu đang phát
+        if (brakeSource.isPlaying)
+            brakeSource.Stop();
+
+        // Bắt đầu âm thanh khởi động nếu chưa chạy
+        if (!startOrReverseSource.isPlaying)
+        {
+            startOrReverseSource.pitch = 0.3f;
+            startOrReverseSource.Play();
+        }
+
+        if (!runningSource.isPlaying)
+            runningSource.Play();
     }
 
     public void BrakeTrain()
     {
         isBraking = true;
+
+        // Bắt đầu âm brake loop
+        if (!brakeSource.isPlaying)
+        {
+            brakeSource.loop = true;
+            brakeSource.Play();
+        }
+
+        // Tắt âm start khi phanh
+        if (startOrReverseSource.isPlaying)
+            startOrReverseSource.Stop();
     }
 
     public void ReverseTrain()
@@ -90,6 +133,20 @@ public class TrainController : MonoBehaviour
             direction *= -1;
             isMoving = true;
             isBraking = false;
+
+            // Tắt brake sound nếu đang phát
+            if (brakeSource.isPlaying)
+                brakeSource.Stop();
+
+            // Bắt đầu âm thanh khởi động nếu chưa chạy
+            if (!startOrReverseSource.isPlaying)
+            {
+                startOrReverseSource.pitch = 0.3f;
+                startOrReverseSource.Play();
+            }
+
+            if (!runningSource.isPlaying)
+                runningSource.Play();
         }
     }
 }
