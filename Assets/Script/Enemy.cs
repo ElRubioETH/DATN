@@ -1,134 +1,194 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.UI;
 
-public class Enemy : MonoBehaviour
+public class EnemyAIWithFOV : MonoBehaviour
 {
-    [Header("Stats")]
-    public float maxHealth = 100f;
-    private float currentHealth;
+    public enum AIState { Patrolling, Chasing, Returning }
+
+    [Header("Sight Settings")]
+    [SerializeField] private float viewRadius = 8f;
+    [SerializeField][Range(0, 360)] private float viewAngle = 90f;
+    [SerializeField] private LayerMask playerMask;
+    [SerializeField] private LayerMask obstacleMask;
+    [SerializeField] private float visionCheckInterval = 0.2f;
+
+    [Header("Movement Settings")]
+    [SerializeField] private float chaseSpeed = 4f;
+    [SerializeField] private float returnSpeed = 2f;
+    [SerializeField] private float rotationSpeed = 5f;
+    [SerializeField] private float stoppingDistance = 1f;
 
     [Header("Chase Settings")]
-    public float chaseDistance = 10f;
-    public float stopDistance = 2f;
-    public float returnDistance = 15f;
+    [SerializeField] private float maxChaseDistance = 12f;
+    [SerializeField] private float memoryDuration = 2f;
 
     [Header("References")]
-    public Slider healthSlider;
-    public Transform healthBarCanvas;
-    public Transform player;
+    [SerializeField] private Transform player;
+    [SerializeField] private CharacterController characterController;
 
-    private NavMeshAgent agent;
+    private AIState currentState = AIState.Patrolling;
     private Vector3 initialPosition;
-    private Animator anim;
-
-    private enum State { Idle, Chasing, Returning }
-    private State currentState = State.Idle;
-
-    private bool isDead = false;
+    private Quaternion initialRotation;
+    private float lastSeenTime;
+    private float nextVisionCheckTime;
 
     void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        anim = GetComponentInChildren<Animator>(); // get that spicy Animator
-
-        currentHealth = maxHealth;
-        UpdateHealthUI();
-
-        if (player == null)
-            player = GameObject.FindGameObjectWithTag("Player")?.transform;
-
         initialPosition = transform.position;
+        initialRotation = transform.rotation;
+
+        if (characterController == null)
+        {
+            characterController = GetComponent<CharacterController>();
+        }
     }
 
     void Update()
     {
-        if (isDead || player == null) return;
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
         switch (currentState)
         {
-            case State.Idle:
-                if (distanceToPlayer <= chaseDistance)
-                    currentState = State.Chasing;
-                agent.SetDestination(transform.position); // stay idle
+            case AIState.Patrolling:
+                PatrolBehavior();
                 break;
-
-            case State.Chasing:
-                if (distanceToPlayer <= stopDistance)
-                {
-                    agent.SetDestination(transform.position); // Stand still
-                }
-                else if (distanceToPlayer >= returnDistance)
-                {
-                    currentState = State.Returning;
-                }
-                else
-                {
-                    agent.SetDestination(player.position);
-                }
+            case AIState.Chasing:
+                ChaseBehavior();
                 break;
-
-            case State.Returning:
-                float distToStart = Vector3.Distance(transform.position, initialPosition);
-                if (distToStart > 0.5f)
-                {
-                    agent.SetDestination(initialPosition);
-                }
-                else
-                {
-                    currentState = State.Idle;
-                }
+            case AIState.Returning:
+                ReturnBehavior();
                 break;
-        }
-
-        // Animator Speed param
-        if (anim != null)
-        {
-            float movementSpeed = agent.velocity.magnitude;
-            anim.SetFloat("Speed", movementSpeed);
-        }
-
-        // Face camera
-        if (healthBarCanvas != null && Camera.main != null)
-        {
-            healthBarCanvas.rotation = Quaternion.LookRotation(healthBarCanvas.position - Camera.main.transform.position);
         }
     }
 
-    public void TakeDamage(float amount)
+    void PatrolBehavior()
     {
-        if (isDead) return;
-
-        currentHealth -= amount;
-        UpdateHealthUI();
-
-        if (currentHealth <= 0f)
+        if (Time.time >= nextVisionCheckTime)
         {
-            Die();
+            nextVisionCheckTime = Time.time + visionCheckInterval;
+            if (CanSeePlayer())
+            {
+                currentState = AIState.Chasing;
+                lastSeenTime = Time.time;
+                return;
+            }
         }
     }
 
-    void UpdateHealthUI()
+    void ChaseBehavior()
     {
-        if (healthSlider != null)
+        if (player == null)
         {
-            healthSlider.value = currentHealth / maxHealth;
+            currentState = AIState.Returning;
+            return;
+        }
+
+        // Update player memory
+        if (Time.time >= nextVisionCheckTime)
+        {
+            nextVisionCheckTime = Time.time + visionCheckInterval;
+            if (CanSeePlayer())
+            {
+                lastSeenTime = Time.time;
+            }
+            else if (Time.time - lastSeenTime > memoryDuration)
+            {
+                currentState = AIState.Returning;
+                return;
+            }
+        }
+
+        // Check distance limits
+        float distanceFromHome = Vector3.Distance(transform.position, initialPosition);
+        if (distanceFromHome > maxChaseDistance)
+        {
+            currentState = AIState.Returning;
+            return;
+        }
+
+        // Chase logic
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        MoveTowards(directionToPlayer, chaseSpeed);
+        SmoothLookAt(player.position);
+    }
+
+    void ReturnBehavior()
+    {
+        Vector3 directionToHome = (initialPosition - transform.position).normalized;
+        float distanceToHome = Vector3.Distance(transform.position, initialPosition);
+
+        if (distanceToHome < stoppingDistance)
+        {
+            currentState = AIState.Patrolling;
+            transform.rotation = Quaternion.Slerp(transform.rotation, initialRotation, rotationSpeed * Time.deltaTime);
+            return;
+        }
+
+        MoveTowards(directionToHome, returnSpeed);
+        SmoothLookAt(initialPosition);
+    }
+
+    bool CanSeePlayer()
+    {
+        if (player == null) return false;
+
+        Vector3 directionToPlayer = (player.position - transform.position);
+        float distanceToPlayer = directionToPlayer.magnitude;
+        directionToPlayer.Normalize();
+
+        // Distance check
+        if (distanceToPlayer > viewRadius) return false;
+
+        // Angle check (more efficient than Vector3.Angle)
+        if (Vector3.Dot(transform.forward, directionToPlayer) < Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad))
+            return false;
+
+        // Obstacle check
+        return !Physics.Raycast(transform.position, directionToPlayer, distanceToPlayer, obstacleMask);
+    }
+
+    void MoveTowards(Vector3 direction, float speed)
+    {
+        if (characterController != null && characterController.enabled)
+        {
+            characterController.Move(direction * speed * Time.deltaTime);
+        }
+        else
+        {
+            transform.position += direction * speed * Time.deltaTime;
         }
     }
 
-    void Die()
+    void SmoothLookAt(Vector3 targetPosition)
     {
-        isDead = true;
-        agent.isStopped = true;
+        Vector3 lookDirection = new Vector3(
+            targetPosition.x - transform.position.x,
+            0,
+            targetPosition.z - transform.position.z
+        );
 
-        if (anim != null)
+        if (lookDirection != Vector3.zero)
         {
-            anim.SetBool("isDead", true);
+            Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
+    }
 
-        // Destroy after animation plays
-        Destroy(gameObject, 3f); // or use event callback from animation
+    void OnDrawGizmosSelected()
+    {
+        // Draw view radius
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, viewRadius);
+
+        // Draw view angle
+        Vector3 forward = transform.forward;
+        Vector3 leftLimit = Quaternion.Euler(0, -viewAngle / 2, 0) * forward;
+        Vector3 rightLimit = Quaternion.Euler(0, viewAngle / 2, 0) * forward;
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(transform.position, transform.position + leftLimit * viewRadius);
+        Gizmos.DrawLine(transform.position, transform.position + rightLimit * viewRadius);
+
+        // Draw current state
+        GUIStyle style = new GUIStyle();
+        style.normal.textColor = Color.white;
+        UnityEditor.Handles.Label(transform.position + Vector3.up * 2, currentState.ToString(), style);
     }
 }
