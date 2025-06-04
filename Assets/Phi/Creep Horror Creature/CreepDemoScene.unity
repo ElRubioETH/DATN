@@ -550,6 +550,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: f5a9bd478ca094495a4520e37f57420d, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 8019ac040d3e7d148a217b49be14886e, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -612,6 +616,10 @@ PrefabInstance:
       value: Creep3
       objectReference: {fileID: 0}
     - target: {fileID: 8979022353975496759, guid: f3978c44f7fb36246b698fdea7f77528, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: adfdf8a7dcef24c4f8323f3332ac2ba7, type: 2}
+    - target: {fileID: 8979022355182249155, guid: f3978c44f7fb36246b698fdea7f77528, type: 3}
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: adfdf8a7dcef24c4f8323f3332ac2ba7, type: 2}
