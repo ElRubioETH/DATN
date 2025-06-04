@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6c5fb820f34286c4b8d97d8b731e5fd6
+timeCreated: 1496439390
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 92461
+  packageName: Mine
+  packageVersion: 1.0
+  assetPath: Assets/Mine/Models/Props/Materials/Lantern.mat
+  uploadId: 183947

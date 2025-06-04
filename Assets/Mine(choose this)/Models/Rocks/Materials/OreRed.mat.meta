@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3b02e0780847fc64681ffc1ff5a23638
+timeCreated: 1496761107
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 92461
+  packageName: Mine
+  packageVersion: 1.0
+  assetPath: Assets/Mine/Models/Rocks/Materials/OreRed.mat
+  uploadId: 183947
