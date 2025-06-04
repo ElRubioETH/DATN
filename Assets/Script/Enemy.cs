@@ -1,134 +1,61 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 
-public class Enemy : MonoBehaviour
+public class EnemySightChase : MonoBehaviour
 {
-    [Header("Stats")]
-    public float maxHealth = 100f;
-    private float currentHealth;
-
-    [Header("Chase Settings")]
-    public float chaseDistance = 10f;
-    public float stopDistance = 2f;
-    public float returnDistance = 15f;
-
     [Header("References")]
-    public Slider healthSlider;
-    public Transform healthBarCanvas;
     public Transform player;
-
     private NavMeshAgent agent;
-    private Vector3 initialPosition;
-    private Animator anim;
 
-    private enum State { Idle, Chasing, Returning }
-    private State currentState = State.Idle;
+    [Header("Vision Settings")]
+    public float sightRange = 15f;
+    public float fieldOfView = 120f;
 
-    private bool isDead = false;
-
-    void Start()
+    private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        anim = GetComponentInChildren<Animator>(); // get that spicy Animator
-
-        currentHealth = maxHealth;
-        UpdateHealthUI();
 
         if (player == null)
-            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            Debug.LogError("❌ Player chưa được gán trong Inspector!");
 
-        initialPosition = transform.position;
+        if (agent == null)
+            Debug.LogError("❌ Không tìm thấy NavMeshAgent!");
     }
 
-    void Update()
+    private void Update()
     {
-        if (isDead || player == null) return;
+        if (player == null || agent == null) return;
 
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float angleToPlayer = Vector3.Angle(transform.forward, directionToPlayer);
 
-        switch (currentState)
+        Debug.Log($"📏 Khoảng cách tới Player: {distanceToPlayer:F2}");
+        Debug.Log($"📐 Góc tới Player: {angleToPlayer:F2}");
+
+        if (distanceToPlayer < sightRange && angleToPlayer < fieldOfView / 2)
         {
-            case State.Idle:
-                if (distanceToPlayer <= chaseDistance)
-                    currentState = State.Chasing;
-                agent.SetDestination(transform.position); // stay idle
-                break;
+            Debug.DrawRay(transform.position, directionToPlayer * sightRange, Color.red);
 
-            case State.Chasing:
-                if (distanceToPlayer <= stopDistance)
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, directionToPlayer, out hit, sightRange))
+            {
+                Debug.Log($"🔍 Raycast trúng: {hit.transform.name}");
+
+                if (hit.transform.CompareTag("Player"))
                 {
-                    agent.SetDestination(transform.position); // Stand still
-                }
-                else if (distanceToPlayer >= returnDistance)
-                {
-                    currentState = State.Returning;
-                }
-                else
-                {
+                    Debug.Log("🎯 Player trong tầm nhìn! Đuổi theo!!");
                     agent.SetDestination(player.position);
                 }
-                break;
-
-            case State.Returning:
-                float distToStart = Vector3.Distance(transform.position, initialPosition);
-                if (distToStart > 0.5f)
-                {
-                    agent.SetDestination(initialPosition);
-                }
                 else
                 {
-                    currentState = State.Idle;
+                    Debug.Log("🚫 Có vật cản giữa Enemy và Player: " + hit.transform.name);
                 }
-                break;
+            }
+            else
+            {
+                Debug.Log("❌ Raycast không trúng gì cả!");
+            }
         }
-
-        // Animator Speed param
-        if (anim != null)
-        {
-            float movementSpeed = agent.velocity.magnitude;
-            anim.SetFloat("Speed", movementSpeed);
-        }
-
-        // Face camera
-        if (healthBarCanvas != null && Camera.main != null)
-        {
-            healthBarCanvas.rotation = Quaternion.LookRotation(healthBarCanvas.position - Camera.main.transform.position);
-        }
-    }
-
-    public void TakeDamage(float amount)
-    {
-        if (isDead) return;
-
-        currentHealth -= amount;
-        UpdateHealthUI();
-
-        if (currentHealth <= 0f)
-        {
-            Die();
-        }
-    }
-
-    void UpdateHealthUI()
-    {
-        if (healthSlider != null)
-        {
-            healthSlider.value = currentHealth / maxHealth;
-        }
-    }
-
-    void Die()
-    {
-        isDead = true;
-        agent.isStopped = true;
-
-        if (anim != null)
-        {
-            anim.SetBool("isDead", true);
-        }
-
-        // Destroy after animation plays
-        Destroy(gameObject, 3f); // or use event callback from animation
     }
 }
