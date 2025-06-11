@@ -13,7 +13,7 @@ public class Bullet : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         // Kiểm tra nếu va vào enemy có component Enemy
-        EnemySightChase  enemy = other.GetComponent<EnemySightChase >();
+        EnemyAIWithFOV  enemy = other.GetComponent<EnemyAIWithFOV>();
         if (enemy != null)
         {
             

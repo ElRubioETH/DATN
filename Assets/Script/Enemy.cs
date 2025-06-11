@@ -1,61 +1,207 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
 
-public class EnemySightChase : MonoBehaviour
+public class EnemyAIWithFOV : MonoBehaviour
 {
+    public enum AIState { Patrolling, Chasing, Returning }
+
+    [Header("Sight Settings")]
+    [SerializeField] private float viewRadius = 8f;
+    [SerializeField][Range(0, 360)] private float viewAngle = 90f;
+    [SerializeField] private LayerMask playerMask;
+    [SerializeField] private LayerMask obstacleMask;
+    [SerializeField] private float visionCheckInterval = 0.2f;
+	
+    [Header("Movement Settings")]
+    [SerializeField] private float chaseSpeed = 4f;
+    [SerializeField] private float returnSpeed = 2f;
+    [SerializeField] private float rotationSpeed = 5f;
+    [SerializeField] private float stoppingDistance = 1f;
+
+    [Header("Chase Settings")]
+    [SerializeField] private float maxChaseDistance = 12f;
+    [SerializeField] private float memoryDuration = 2f;
+
     [Header("References")]
-    public Transform player;
-    private NavMeshAgent agent;
+    [SerializeField] private Transform player;
+    [SerializeField] private CharacterController characterController;
 
-    [Header("Vision Settings")]
-    public float sightRange = 15f;
-    public float fieldOfView = 120f;
+    private AIState currentState = AIState.Patrolling;
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+    private float lastSeenTime;
+    private float nextVisionCheckTime;
+    private Animator animator;
 
-    private void Start()
+    void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
+        initialPosition = transform.position;
+        initialRotation = transform.rotation;
 
-        if (player == null)
-            Debug.LogError("❌ Player chưa được gán trong Inspector!");
-
-        if (agent == null)
-            Debug.LogError("❌ Không tìm thấy NavMeshAgent!");
+        if (characterController == null)
+        {
+            characterController = GetComponent<CharacterController>();
+        }
+animator = GetComponentInChildren<Animator>();
     }
 
-    private void Update()
+    void Update()
     {
-        if (player == null || agent == null) return;
-
-        Vector3 directionToPlayer = (player.position - transform.position).normalized;
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        float angleToPlayer = Vector3.Angle(transform.forward, directionToPlayer);
-
-        Debug.Log($"📏 Khoảng cách tới Player: {distanceToPlayer:F2}");
-        Debug.Log($"📐 Góc tới Player: {angleToPlayer:F2}");
-
-        if (distanceToPlayer < sightRange && angleToPlayer < fieldOfView / 2)
+        switch (currentState)
         {
-            Debug.DrawRay(transform.position, directionToPlayer * sightRange, Color.red);
+            case AIState.Patrolling:
+                PatrolBehavior();
+                break;
+            case AIState.Chasing:
+                ChaseBehavior();
+                break;
+            case AIState.Returning:
+                ReturnBehavior();
+                break;
+        }
+    }
 
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, directionToPlayer, out hit, sightRange))
+    void PatrolBehavior()
+    {
+        if (Time.time >= nextVisionCheckTime)
+        {
+            nextVisionCheckTime = Time.time + visionCheckInterval;
+            if (CanSeePlayer())
             {
-                Debug.Log($"🔍 Raycast trúng: {hit.transform.name}");
-
-                if (hit.transform.CompareTag("Player"))
-                {
-                    Debug.Log("🎯 Player trong tầm nhìn! Đuổi theo!!");
-                    agent.SetDestination(player.position);
-                }
-                else
-                {
-                    Debug.Log("🚫 Có vật cản giữa Enemy và Player: " + hit.transform.name);
-                }
-            }
-            else
-            {
-                Debug.Log("❌ Raycast không trúng gì cả!");
+animator.SetBool("isWalking", false);
+animator.SetBool("isCrouching", false);
+                currentState = AIState.Chasing;
+                lastSeenTime = Time.time;
+                return;
             }
         }
+    }
+
+    void ChaseBehavior()
+    {
+animator.SetBool("isWalking", true);
+        if (player == null)
+        {
+            currentState = AIState.Returning;
+            return;
+        }
+
+        // Update player memory
+        if (Time.time >= nextVisionCheckTime)
+        {
+            nextVisionCheckTime = Time.time + visionCheckInterval;
+            if (CanSeePlayer())
+            {
+                lastSeenTime = Time.time;
+            }
+            else if (Time.time - lastSeenTime > memoryDuration)
+            {
+                currentState = AIState.Returning;
+                return;
+            }
+        }
+
+        // Check distance limits
+        float distanceFromHome = Vector3.Distance(transform.position, initialPosition);
+        if (distanceFromHome > maxChaseDistance)
+        {
+            currentState = AIState.Returning;
+            return;
+        }
+
+        // Chase logic
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        MoveTowards(directionToPlayer, chaseSpeed);
+        SmoothLookAt(player.position);
+    }
+void Die()
+{
+    animator.SetTrigger("isDead");
+    currentState = AIState.Patrolling; // hoặc gán flag khác để vô hiệu hóa AI
+}
+    void ReturnBehavior()
+    {
+
+
+        Vector3 directionToHome = (initialPosition - transform.position).normalized;
+        float distanceToHome = Vector3.Distance(transform.position, initialPosition);
+
+        if (distanceToHome < stoppingDistance)
+        {
+            currentState = AIState.Patrolling;
+            transform.rotation = Quaternion.Slerp(transform.rotation, initialRotation, rotationSpeed * Time.deltaTime);
+            return;
+            animator.SetBool("isWalking", false);
+        }
+
+        MoveTowards(directionToHome, returnSpeed);
+        SmoothLookAt(initialPosition);
+    }
+
+    bool CanSeePlayer()
+    {
+        if (player == null) return false;
+
+        Vector3 directionToPlayer = (player.position - transform.position);
+        float distanceToPlayer = directionToPlayer.magnitude;
+        directionToPlayer.Normalize();
+
+        // Distance check
+        if (distanceToPlayer > viewRadius) return false;
+
+        // Angle check (more efficient than Vector3.Angle)
+        if (Vector3.Dot(transform.forward, directionToPlayer) < Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad))
+            return false;
+        animator.SetTrigger("isRoaring"); // hoặc "womboCombo"
+
+        // Obstacle check
+        return !Physics.Raycast(transform.position, directionToPlayer, distanceToPlayer, obstacleMask);
+    }
+
+    void MoveTowards(Vector3 direction, float speed)
+    {
+        if (characterController != null && characterController.enabled)
+        {
+            characterController.Move(direction * speed * Time.deltaTime);
+        }
+        else
+        {
+            transform.position += direction * speed * Time.deltaTime;
+        }
+    }
+
+    void SmoothLookAt(Vector3 targetPosition)
+    {
+        Vector3 lookDirection = new Vector3(
+            targetPosition.x - transform.position.x,
+            0,
+            targetPosition.z - transform.position.z
+        );
+
+        if (lookDirection != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        // Draw view radius
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, viewRadius);
+
+        // Draw view angle
+        Vector3 forward = transform.forward;
+        Vector3 leftLimit = Quaternion.Euler(0, -viewAngle / 2, 0) * forward;
+        Vector3 rightLimit = Quaternion.Euler(0, viewAngle / 2, 0) * forward;
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(transform.position, transform.position + leftLimit * viewRadius);
+        Gizmos.DrawLine(transform.position, transform.position + rightLimit * viewRadius);
+
+        // Draw current state
+        GUIStyle style = new GUIStyle();
+        style.normal.textColor = Color.white;
+        UnityEditor.Handles.Label(transform.position + Vector3.up * 2, currentState.ToString(), style);
     }
 }
