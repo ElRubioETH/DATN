@@ -5,14 +5,15 @@ public class TrainController : MonoBehaviour
 {
     [Header("References")]
     public SplineContainer splineContainer;
-    public Transform train;       // đầu tàu
-    public Transform rearCar;     // toa tàu phía sau
+    public Transform train; // đầu tàu
 
     [Header("Movement Settings")]
     public float maxSpeed = 0.2f;
     public float acceleration = 0.05f;
     public float deceleration = 0.05f;
-    public float rearCarDistance = 2f; // khoảng cách lùi sau (tính bằng spline %)
+
+    [Header("Startup Settings")]
+    [SerializeField] private bool startOnAwake = false;
 
     private float currentSpeed = 0f;
     private float t = 0f;
@@ -22,12 +23,14 @@ public class TrainController : MonoBehaviour
 
     void Start()
     {
-        // Gắn vị trí đầu tiên
+        // Gắn vị trí đầu tiên cho đầu tàu
         MoveTrain(train, t);
 
-        // Tính và gắn vị trí cho toa sau (offset ngay từ đầu)
-        float rearT = Mathf.Repeat(t - (rearCarDistance * direction / splineContainer.CalculateLength()), 1f);
-        MoveTrain(rearCar, rearT);
+        // Bắt đầu tự động nếu được bật
+        if (startOnAwake)
+        {
+            StartTrain();
+        }
     }
 
     void Update()
@@ -47,15 +50,11 @@ public class TrainController : MonoBehaviour
                 isMoving = false;
         }
 
-        // Di chuyển dọc theo spline
+        // Di chuyển đầu tàu dọc theo spline
         t += currentSpeed * Time.deltaTime;
         t = Mathf.Repeat(t, 1f);
 
         MoveTrain(train, t);
-
-        // Toa phía sau chạy theo khoảng cách offset
-        float rearT = Mathf.Repeat(t - (rearCarDistance * direction / splineContainer.CalculateLength()), 1f);
-        MoveTrain(rearCar, rearT);
     }
 
     private void MoveTrain(Transform target, float tValue)
