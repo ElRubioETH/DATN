@@ -1,0 +1,1 @@
+Placeholder for RainEffect.prefab (Create in Unity and assign this manually).

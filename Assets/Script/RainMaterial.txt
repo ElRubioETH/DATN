@@ -1,0 +1,1 @@
+Placeholder for RainMaterial.mat (Assign rain texture in Unity).
