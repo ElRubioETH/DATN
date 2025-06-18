@@ -8,24 +8,22 @@ public class NPCQuest : MonoBehaviour
     public float interactionDistance = 3f; // Khoảng cách để tương tác
     public TextMeshProUGUI dialogueText; // Text UI để hiển thị hội thoại
     public GameObject dialoguePanel; // Panel chứa hộp thoại
-    private bool isPlayerInRange; // Kiểm tra người chơi có trong khoảng cách không
-    private bool isQuestActive = false; // Trạng thái nhiệm vụ
-    private int requiredItems = 5; // Số vật phẩm cần thu thập (quả táo)
-    private int collectedItems = 0; // Số vật phẩm đã thu thập
-    private string questItemName = "Apple"; // Tên vật phẩm cần thu thập
+    public bool isPlayerInRange; // Kiểm tra người chơi có trong khoảng cách không
+    public bool isQuestActive = false; // Trạng thái nhiệm vụ
+    public int requiredItems = 5; // Số vật phẩm cần thu thập (quả táo)
+    public int collectedItems = 0; // Số vật phẩm đã thu thập
+    public string questItemName = "Apple"; // Tên vật phẩm cần thu thập
 
-    // Tham chiếu đến InventorySystem
+    // Tham chiếu đến InventorySystem và QuestDisplayUI
     private InventorySystem inventorySystem;
+    private QuestDisplayUI questUI;
 
     void Start()
     {
         dialoguePanel.SetActive(false); // Ẩn hộp thoại khi bắt đầu
-        // Tìm InventorySystem trên người chơi
+        // Tìm InventorySystem và QuestDisplayUI trên người chơi
         inventorySystem = player.GetComponent<InventorySystem>();
-        if (inventorySystem == null)
-        {
-            Debug.LogError("Không tìm thấy InventorySystem trên người chơi!");
-        }
+        questUI = player.GetComponent<QuestDisplayUI>();
     }
 
     void Update()
@@ -48,6 +46,8 @@ public class NPCQuest : MonoBehaviour
                 dialoguePanel.SetActive(false);
             }
         }
+        // Cập nhật tiến độ liên tục
+        UpdateQuestProgress();
     }
 
     void Interact()
@@ -64,7 +64,6 @@ public class NPCQuest : MonoBehaviour
         else
         {
             // Kiểm tra tiến độ nhiệm vụ
-            UpdateQuestProgress();
             if (collectedItems >= requiredItems)
             {
                 dialogueText.text = $"Cảm ơn bạn đã thu thập đủ {requiredItems} quả {questItemName}! Nhiệm vụ hoàn thành! (Nhấn E để nhận thưởng, F để ẩn)";
@@ -81,7 +80,7 @@ public class NPCQuest : MonoBehaviour
     {
         if (inventorySystem != null)
         {
-            collectedItems = inventorySystem.GetItemCount(questItemName); // Sử dụng phương thức công khai
+            collectedItems = inventorySystem.GetItemCount(questItemName);
         }
         else
         {
@@ -97,10 +96,6 @@ public class NPCQuest : MonoBehaviour
             // Giảm số lượng vật phẩm trong inventory
             inventorySystem.ReduceItemCount(questItemName, requiredItems);
 
-            // Cấp thưởng (giả lập)
-            int rewardGold = 200;
-            Debug.Log($"Nhiệm vụ hoàn thành! Phần thưởng: {rewardGold} vàng");
-
             // Đặt lại trạng thái
             isQuestActive = false;
             collectedItems = 0;
@@ -114,7 +109,6 @@ public class NPCQuest : MonoBehaviour
         if (isQuestActive && inventorySystem != null)
         {
             collectedItems = inventorySystem.GetItemCount(questItemName);
-            Debug.Log($"Đã thu thập: {collectedItems}/{requiredItems} quả {questItemName}");
         }
     }
 
@@ -127,7 +121,7 @@ public class NPCQuest : MonoBehaviour
         }
     }
 
-    // Hiển thị vùng tương tác (cho debug)
+    // Hiển thị vùng tương tác
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
