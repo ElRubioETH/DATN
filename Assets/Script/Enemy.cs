@@ -1,7 +1,12 @@
 ﻿using UnityEngine;
+using UnityEngine.UI; // dòng mới
+
 
 public class EnemyAIWithFOV : MonoBehaviour
 {
+    [SerializeField] private Slider healthSlider;
+    [SerializeField] private Canvas healthCanvas;
+
     public enum AIState { Patrolling, Chasing, Returning }
     [Header("Health Settings")]
     public float maxHealth = 100f;
@@ -37,6 +42,12 @@ public class EnemyAIWithFOV : MonoBehaviour
 
     void Start()
     {
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
+        }
+
         currentHealth = maxHealth;
 
         initialPosition = transform.position;
@@ -66,6 +77,9 @@ animator = GetComponentInChildren<Animator>();
     }
     public void TakeDamage(float amount)
     {
+        if (healthSlider != null)
+            healthSlider.value = currentHealth;
+
         if (isDead) return;
 
         currentHealth -= amount;
@@ -131,6 +145,9 @@ animator.SetBool("isWalking", true);
     }
     void Die()
     {
+        if (healthCanvas != null)
+            healthCanvas.enabled = false;
+
         isDead = true;
         animator.SetTrigger("isDead");
 
