@@ -3,7 +3,10 @@
 public class EnemyAIWithFOV : MonoBehaviour
 {
     public enum AIState { Patrolling, Chasing, Returning }
-
+    [Header("Health Settings")]
+    public float maxHealth = 100f;
+    private float currentHealth;
+    private bool isDead = false;
     [Header("Sight Settings")]
     [SerializeField] private float viewRadius = 8f;
     [SerializeField][Range(0, 360)] private float viewAngle = 90f;
@@ -34,6 +37,8 @@ public class EnemyAIWithFOV : MonoBehaviour
 
     void Start()
     {
+        currentHealth = maxHealth;
+
         initialPosition = transform.position;
         initialRotation = transform.rotation;
 
@@ -57,6 +62,17 @@ animator = GetComponentInChildren<Animator>();
             case AIState.Returning:
                 ReturnBehavior();
                 break;
+        }
+    }
+    public void TakeDamage(float amount)
+    {
+        if (isDead) return;
+
+        currentHealth -= amount;
+
+        if (currentHealth <= 0f)
+        {
+            Die();
         }
     }
 
@@ -113,11 +129,19 @@ animator.SetBool("isWalking", true);
         MoveTowards(directionToPlayer, chaseSpeed);
         SmoothLookAt(player.position);
     }
-void Die()
-{
-    animator.SetTrigger("isDead");
-    currentState = AIState.Patrolling; // hoặc gán flag khác để vô hiệu hóa AI
-}
+    void Die()
+    {
+        isDead = true;
+        animator.SetTrigger("isDead");
+
+        // Vô hiệu hóa AI di chuyển và phát hiện
+        currentState = AIState.Patrolling; // hoặc dùng flag riêng
+        enabled = false;
+
+        // Option: Destroy sau vài giây
+        Destroy(gameObject, 3f);
+    }
+
     void ReturnBehavior()
     {
 

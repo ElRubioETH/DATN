@@ -12,15 +12,12 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // Kiểm tra nếu va vào enemy có component Enemy
-        EnemyAIWithFOV  enemy = other.GetComponent<EnemyAIWithFOV>();
+        EnemyAIWithFOV enemy = other.GetComponent<EnemyAIWithFOV>();
         if (enemy != null)
         {
-            
+            enemy.TakeDamage(damage);
             Destroy(gameObject);
-
         }
-
-  
     }
+
 }
