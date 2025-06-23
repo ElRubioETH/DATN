@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d1f33f2d50256224b9c6134e9241faae
+timeCreated: 1496607742
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 92461
+  packageName: Mine
+  packageVersion: 1.0
+  assetPath: Assets/Mine/Prefabs/Base/Turn3.prefab
+  uploadId: 183947

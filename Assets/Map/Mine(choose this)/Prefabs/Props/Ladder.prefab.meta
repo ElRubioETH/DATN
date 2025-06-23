@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ac4b604df9ca8124ca9a1c919d09f13c
+timeCreated: 1496608051
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 92461
+  packageName: Mine
+  packageVersion: 1.0
+  assetPath: Assets/Mine/Prefabs/Props/Ladder.prefab
+  uploadId: 183947

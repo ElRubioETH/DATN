@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a6cac84b4d0342a489af1031cf79e5cf
+timeCreated: 1496607623
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 92461
+  packageName: Mine
+  packageVersion: 1.0
+  assetPath: Assets/Mine/Prefabs/Base/RampUp.prefab
+  uploadId: 183947

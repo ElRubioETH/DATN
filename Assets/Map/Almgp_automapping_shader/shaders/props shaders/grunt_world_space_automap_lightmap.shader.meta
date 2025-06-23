@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a28025cb4e43da246aaea113a0152e53
+timeCreated: 1427039163
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33428
+  packageName: Automapping Enviroment Shader
+  packageVersion: 1.0
+  assetPath: Assets/Almgp_automapping_shader/shaders/props shaders/grunt_world_space_automap_lightmap.shader
+  uploadId: 56840
