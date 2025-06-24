@@ -9,6 +9,9 @@ TagManager:
   - Turret
   - Enemy
   - NPCQuest
+  - TriggerZone
+  - Interactable
+  - QuestTriggerZone
   layers:
   - Default
   - TransparentFX
@@ -17,7 +20,7 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
+  - Interactable
   - 
   - 
   - 

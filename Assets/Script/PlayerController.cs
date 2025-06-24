@@ -3,6 +3,13 @@
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
 {
+    [SerializeField] private float interactDistance = 3f;
+    [SerializeField] private LayerMask interactableLayer;
+    [SerializeField] private GameObject crosshairDot;
+    [SerializeField] private Sprite defaultCrosshair;
+    [SerializeField] private Sprite handCrosshair;
+
+    private Camera cam;
     [Header("Movement Settings")]
     public float walkSpeed = 4f;
     public float runSpeed = 6f;
@@ -29,6 +36,10 @@ public class FirstPersonController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
+        cam = playerCamera.GetComponent<Camera>();
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         //Cursor.lockState = CursorLockMode.Locked;
         //Cursor.visible = false;
     }
@@ -37,6 +48,25 @@ public class FirstPersonController : MonoBehaviour
     {
         HandleLook();
         HandleMovement();
+        HandleInteractionCheck();
+    }
+    void HandleInteractionCheck()
+    {
+        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, interactDistance, interactableLayer))
+        {
+            // Nếu vật thể đủ gần và có tag tương tác
+            if (hit.collider.CompareTag("Interactable"))
+            {
+                crosshairDot.GetComponent<UnityEngine.UI.Image>().sprite = handCrosshair;
+                return;
+            }
+        }
+
+        // Nếu không trúng gì thì để lại crosshair mặc định
+        crosshairDot.GetComponent<UnityEngine.UI.Image>().sprite = defaultCrosshair;
     }
 
     void HandleLook()

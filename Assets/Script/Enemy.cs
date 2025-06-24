@@ -171,7 +171,6 @@ animator.SetBool("isWalking", true);
             currentState = AIState.Patrolling;
             transform.rotation = Quaternion.Slerp(transform.rotation, initialRotation, rotationSpeed * Time.deltaTime);
             return;
-            animator.SetBool("isWalking", false);
         }
 
         MoveTowards(directionToHome, returnSpeed);

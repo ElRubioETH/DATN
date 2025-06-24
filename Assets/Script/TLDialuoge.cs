@@ -1,8 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 
 public class DialogueManager : MonoBehaviour
 {
+    public UnityEngine.Events.UnityEvent onDialogueFinished; // thêm dòng này
     [Header("UI Elements")]
     public GameObject dialoguePanel;
     public TMP_Text dialogueText;
@@ -46,6 +47,7 @@ public class DialogueManager : MonoBehaviour
         {
             dialoguePanel.SetActive(false);
             isDialogueActive = false;
+            onDialogueFinished?.Invoke(); // gọi event sau khi thoại kết thúc
         }
     }
 }
