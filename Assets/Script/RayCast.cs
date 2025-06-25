@@ -1,3 +1,4 @@
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class FirstPersonInteractor : MonoBehaviour
@@ -6,6 +7,7 @@ public class FirstPersonInteractor : MonoBehaviour
     public LayerMask interactableLayer;
     public GameObject bluePrintPanel;
     private Camera cam;
+    private bool isBluePrint = false;
 
     void Start()
     {
@@ -28,7 +30,12 @@ public class FirstPersonInteractor : MonoBehaviour
                 else if (hit.collider.name.Contains("Brake"))
                     controller.ToggleBrake();
                 else if (hit.collider.name.Contains("BluePrint"))
-                    bluePrintPanel.gameObject.SetActive(true);
+                {
+                    isBluePrint = !isBluePrint;
+                    bluePrintPanel.SetActive(isBluePrint);
+                }
+                  
+                   
             }
         }
     }

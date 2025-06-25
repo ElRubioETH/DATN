@@ -38,8 +38,8 @@ public class FirstPersonController : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         cam = playerCamera.GetComponent<Camera>();
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         //Cursor.lockState = CursorLockMode.Locked;
         //Cursor.visible = false;
     }
