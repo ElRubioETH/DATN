@@ -3,6 +3,11 @@
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
 {
+    [Header("Audio Settings")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip footstepClip;
+    [SerializeField] private AudioClip jumpClip;
+
     [SerializeField] private float interactDistance = 3f;
     [SerializeField] private LayerMask interactableLayer;
     [SerializeField] private GameObject crosshairDot;
@@ -94,6 +99,16 @@ public class FirstPersonController : MonoBehaviour
 
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
         bool isMoving = move != Vector3.zero;
+        if (isGrounded && isMoving && !audioSource.isPlaying)
+        {
+            audioSource.clip = footstepClip;
+            audioSource.loop = true;
+            audioSource.Play();
+        }
+        else if ((!isMoving || !isGrounded) && audioSource.isPlaying && audioSource.clip == footstepClip)
+        {
+            audioSource.Stop();
+        }
 
         // Running check
         bool isRunning = Input.GetKey(KeyCode.LeftShift) && isMoving;
@@ -103,7 +118,12 @@ public class FirstPersonController : MonoBehaviour
 
         // Jump
         if (Input.GetButtonDown("Jump") && isGrounded)
+        {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            if (jumpClip != null && audioSource != null)
+                audioSource.PlayOneShot(jumpClip);
+        }
+
 
         // Gravity
         velocity.y += gravity * Time.deltaTime;

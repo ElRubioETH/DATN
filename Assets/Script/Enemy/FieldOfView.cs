@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +6,13 @@ using UnityEngine.AI;
 
 public class FieldOfView : MonoBehaviour
 {
+    public Animator animator;
+    private AudioSource audioSource;
+    [Header("Audio Clips")]
+    [SerializeField] private AudioClip detectClip;
+    [SerializeField] private AudioClip chaseClip;
+    [SerializeField] private AudioClip attackClip;
+    [SerializeField] private AudioClip dieClip;
     // Add these properties to your FieldOfView class
     public float DetectionProgress => detectionProgress;
     public float DetectionTime => detectionTime;
@@ -44,6 +51,8 @@ public class FieldOfView : MonoBehaviour
 
     private void Start()
     {
+        animator = GetComponentInChildren<Animator>();
+        audioSource = GetComponent<AudioSource>();
         playerRef = GameObject.FindGameObjectWithTag("Player");
         agent = GetComponent<NavMeshAgent>();
         startingPosition = transform.position;
@@ -125,6 +134,8 @@ public class FieldOfView : MonoBehaviour
 
     private IEnumerator PatrolState()
     {
+        if (animator) animator.SetBool("IsWalking", true);
+
         if (patrolPoints.Count == 0) yield break;
 
         agent.speed = patrolSpeed;
@@ -140,12 +151,17 @@ public class FieldOfView : MonoBehaviour
                 // Optional: Add a wait time at each patrol point
                 yield return new WaitForSeconds(1f);
             }
+            if (animator) animator.SetBool("IsWalking", false);
+
             yield return null;
         }
+
     }
 
     private IEnumerator DetectState()
     {
+        PlaySound(detectClip);
+        if (animator) animator.SetTrigger("Detect");
         detectionProgress = 0f;
 
         while (currentState == EnemyState.Detect && detectionProgress < detectionTime)
@@ -177,6 +193,8 @@ public class FieldOfView : MonoBehaviour
 
     private IEnumerator ChaseState()
     {
+        PlaySound(chaseClip);
+        if (animator) animator.SetBool("IsChasing", true);
         agent.speed = chaseSpeed;
         chaseTimeRemaining = chaseDuration;
 
@@ -196,6 +214,7 @@ public class FieldOfView : MonoBehaviour
 
             yield return null;
         }
+        if (animator) animator.SetBool("IsChasing", false);
 
         // Transition to return state when chase time is up
         currentState = EnemyState.Return;
@@ -203,6 +222,7 @@ public class FieldOfView : MonoBehaviour
 
     private IEnumerator ReturnState()
     {
+        StopSound(chaseClip);
         agent.SetDestination(startingPosition);
 
         while (currentState == EnemyState.Return)
@@ -226,9 +246,18 @@ public class FieldOfView : MonoBehaviour
             yield return null;
         }
     }
+    public void Attack()
+    {
+        if (animator) animator.SetTrigger("Attack");
+        PlaySound(attackClip);
+
+        // Nếu muốn gây sát thương cho player, thêm code tại đây
+    }
 
     private IEnumerator DieState()
     {
+        if (animator) animator.SetTrigger("Die");
+        PlaySound(dieClip);
         isDead = true;
         agent.isStopped = true;
 
@@ -236,6 +265,7 @@ public class FieldOfView : MonoBehaviour
         // For example:
         // GetComponent<Animator>().SetTrigger("Die");
         // yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(2f); // chờ animation chết
 
         Destroy(gameObject);
         yield return null;
@@ -257,5 +287,15 @@ public class FieldOfView : MonoBehaviour
         {
             currentState = EnemyState.Die;
         }
+    }
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+            audioSource.PlayOneShot(clip);
+    }
+    private void StopSound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+            audioSource.Stop(clip);
     }
 }
