@@ -35823,6 +35823,10 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6570846866899641589, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
+      propertyPath: jumpClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 55d4d87b40c0538459639813b9b8e246, type: 3}
+    - target: {fileID: 6570846866899641589, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 2094081906}
@@ -35924,15 +35928,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.0496864
+      value: 201.2
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 16.92
+      value: 25.01
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 389.8413
+      value: 1161.8
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalRotation.w
@@ -384865,7 +384869,7 @@ AudioSource:
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
