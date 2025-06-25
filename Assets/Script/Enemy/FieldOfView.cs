@@ -296,6 +296,6 @@ public class FieldOfView : MonoBehaviour
     private void StopSound(AudioClip clip)
     {
         if (audioSource != null && clip != null)
-            audioSource.Stop(clip);
+            audioSource.Stop();
     }
 }
