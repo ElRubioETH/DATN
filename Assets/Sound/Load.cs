@@ -13,7 +13,7 @@ public class SceneLoader : MonoBehaviour
     // Gọi khi nhấn button, truyền tên scene cần load
     public void LoadSceneByName(string sceneName)
     {
-        StartCoroutine(LoadSceneAsync("mapupdate"));
+        StartCoroutine(LoadSceneAsync("CutScene"));
     }
 
     private IEnumerator LoadSceneAsync(string sceneName)

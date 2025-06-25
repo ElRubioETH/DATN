@@ -36071,15 +36071,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 201.2
+      value: 5.7
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 25.01
+      value: 21.23
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1161.8
+      value: 384.8
       objectReference: {fileID: 0}
     - target: {fileID: 7537256643744472113, guid: 18d17940275cb304ba289816c95db2f5, type: 3}
       propertyPath: m_LocalRotation.w
@@ -57293,17 +57293,35 @@ MonoBehaviour:
       TangentIn:
         x: -0
         y: -0
-        z: -22.321238
+        z: -18.899311
       TangentOut:
         x: 0
         y: 0
-        z: 36.216267
+        z: 20.689083
       Rotation:
         value:
-          x: 0.0498722
-          y: 0.7623301
-          z: 0.013755738
-          w: 0.6451173
+          x: 0.05462
+          y: 0.78133106
+          z: 0.008734742
+          w: 0.6216607
+    - Position:
+        x: 116.31
+        y: -5.16
+        z: 837.81995
+      TangentIn:
+        x: 0.000005722046
+        y: -0.00000023841858
+        z: -24.614075
+      TangentOut:
+        x: -0.0000038146973
+        y: 0.00000014901161
+        z: 31.90767
+      Rotation:
+        value:
+          x: 0.003853419
+          y: 0.7755866
+          z: -0.02203404
+          w: 0.6308448
     - Position:
         x: 195
         y: -7
@@ -57311,17 +57329,17 @@ MonoBehaviour:
       TangentIn:
         x: -0
         y: -0
-        z: -33.398003
+        z: -22.270159
       TangentOut:
         x: 0
         y: 0
-        z: 27.953228
+        z: 25.107376
       Rotation:
         value:
-          x: -0.028616957
-          y: 0.46842486
-          z: -0.103485815
-          w: 0.8769549
+          x: -0.032482944
+          y: 0.44573596
+          z: -0.10213852
+          w: 0.888725
     - Position:
         x: 223
         y: -10
@@ -58517,6 +58535,8 @@ MonoBehaviour:
       Tension: 0.5
     - Mode: 0
       Tension: 0.5
+    - Mode: 4
+      Tension: 0.5
     - Mode: 0
       Tension: 0.5
     - Mode: 0
@@ -58714,10 +58734,10 @@ MonoBehaviour:
       - Spline: 1
         Knot: 0
       - Spline: 0
-        Knot: 28
+        Knot: 29
     - Knots:
       - Spline: 0
-        Knot: 29
+        Knot: 30
       - Spline: 1
         Knot: 1
 --- !u!4 &381888766
