@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 13ebbd28c88b9e142803def0107f1ea4
+timeCreated: 1427487641
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33428
+  packageName: Automapping Enviroment Shader
+  packageVersion: 1.0
+  assetPath: Assets/Almgp_automapping_shader/materials/sea_rock_grey.mat
+  uploadId: 56840

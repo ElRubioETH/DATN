@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b93bdac274ba9514b866b8ff6fa67f3a
+timeCreated: 1427487640
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33428
+  packageName: Automapping Enviroment Shader
+  packageVersion: 1.0
+  assetPath: Assets/Almgp_automapping_shader/materials/sea_rock_red.mat
+  uploadId: 56840

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4f59f2e1e3b48bf419f32bf16857e33f
+timeCreated: 1427417323
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33428
+  packageName: Automapping Enviroment Shader
+  packageVersion: 1.0
+  assetPath: Assets/Almgp_automapping_shader/prefabs/sea_cliff_cluster.prefab
+  uploadId: 56840
